@@ -23,7 +23,7 @@ public class MohistMC {
 	public static Bot bot;
 	public static HashMap<Long, GroupHandler> groups = new HashMap<>();
 
-	public static void main(String[] args) throws LoginException, InterruptedException {
+	public static void main(String[] args) throws LoginException {
 		jda = new JDABuilder().setToken("token").addEventListeners(new DiscordToQQ()).build();
 
 		bot = BotFactoryJvm.newBot(0L /*Your account ID long*/, "password");
@@ -31,7 +31,5 @@ public class MohistMC {
 		Events.registerEvents(bot, new QQToDiscord());
 		//Register Discord channel and assign it to a group
 		new GroupHandler("QQgroupId", "DiscordChannelId", "WebhookURL");
-		bot.join();
-		Thread.currentThread().join();
 	}
 }

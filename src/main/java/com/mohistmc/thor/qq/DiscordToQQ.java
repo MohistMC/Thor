@@ -75,17 +75,14 @@ public class DiscordToQQ extends ListenerAdapter {
 		} catch (Exception ignored) {
 		}
 
-		new Thread(() -> {
-			MessageChainBuilder built;
-			try {
-				built = makeMessage(group, null, e.getMessage());
-				group.group.sendMessage(built.build());
-				if(!group.displayConfirm.contains(e.getAuthor().getId()))
-					e.getChannel().sendMessage(built.build().contentToString()).queue();
-			} catch (Exception exception) {
-				e.getChannel().sendMessage("Failed to send this message!").queue();
-				exception.printStackTrace();
-			}
-		}).start();
+		try {
+			MessageChainBuilder built = makeMessage(group, null, e.getMessage());
+			group.group.sendMessage(built.build());
+			if(!group.displayConfirm.contains(e.getAuthor().getId()))
+				e.getChannel().sendMessage(built.build().contentToString()).queue();
+		} catch (Exception exception) {
+			e.getChannel().sendMessage("Failed to send this message!").queue();
+			exception.printStackTrace();
+		}
 	}
 }

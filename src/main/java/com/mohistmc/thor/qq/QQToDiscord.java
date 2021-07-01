@@ -12,7 +12,11 @@ import net.mamoe.mirai.message.data.Face;
 import net.mamoe.mirai.message.data.Image;
 import net.mamoe.mirai.message.data.Voice;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 
 import static com.mohistmc.thor.MohistMC.groups;
@@ -38,7 +42,7 @@ public class QQToDiscord extends SimpleListenerHost {
 		builder.setAvatarUrl(e.getSender().getAvatarUrl());
 
 		String msg = e.getMessage().contentToString().replaceAll("\\[图片\\]", "").replaceAll("\\[表情\\]", "").replace("@DiscordBot", "<@" + group.lastSpeaker + ">");
-		if(msg.length() == 0) return ListeningStatus.LISTENING;
+		String originalMsg = msg; //Fix weird user id translation and put name instead.
 
 		//Ping corresponding Discord users
 		ArrayList<String> pinged = new ArrayList<>();
@@ -47,9 +51,10 @@ public class QQToDiscord extends SimpleListenerHost {
 				pinged.add(word.replaceFirst("@", ""));
 
 		for (Member member : group.tc.getMembers()) {
-			String name = member.getNickname() == null ? member.getEffectiveName() : member.getNickname();
-			if(pinged.contains(name))
-				msg = msg.replaceAll("@" + name, "<@" + member.getId() + ">");
+			if(member.getNickname() != null && pinged.contains(member.getNickname()))
+				msg = msg.replaceAll("@" + member.getNickname(), "<@" + member.getId() + ">");
+			if(pinged.contains(member.getEffectiveName()))
+				msg = msg.replaceAll("@" + member.getEffectiveName(), "<@" + member.getId() + ">");
 		}
 
 		//Try to convert xml sent by bots into an embed :D
@@ -65,28 +70,43 @@ public class QQToDiscord extends SimpleListenerHost {
 
 		if(!e.getMessage().contentToString().equals("[图片]") && !e.getMessage().contentToString().equals("[表情]")) {
 			try {
-				String translation = translate(msg, "en");
+				String translation = translate(originalMsg, "en");
 				if(translation.length() == 0) throw new Exception();
 
 				builder.setContent(msg + "\n--------\n" + translation);
 			} catch (Exception ex) { //Failed to translate or translation isn't needed, just send the original message
 				builder.setContent(msg);
 			}
+			if(!builder.isEmpty()) client.send(builder.build()); //Send message content
 		}
 
+		//Send emojis, voices and images
 		for (net.mamoe.mirai.message.data.Message m : e.getMessage()) {
-			if(m instanceof Face)
+			if(m instanceof Face) {
 				builder.setContent("https://raw.githubusercontent.com/khjxiaogu/DefaultQQEmoticon/master/emoji/" + ((Face) m).getId() + ".gif");
-			if(m instanceof Voice)
+				client.send(builder.build());
+			}
+			if(m instanceof Voice) {
 				try {
 					builder.addFile(((Voice) m).getFileName(), getInput(((Voice) m).getUrl()));
+					client.send(builder.build());
 				} catch (IOException ignored) {
 				}
-			if(m instanceof Image)
-				builder.setContent(e.getBot().queryImageUrl((Image) m).replace("?term=2", ""));
+			}
+			if(m instanceof Image) {
+				try {
+					BufferedImage bufferedImage = ImageIO.read(new URL(e.getBot().queryImageUrl((Image) m).replace("?term=2", "")));
+					ByteArrayOutputStream byteArrayOut = new ByteArrayOutputStream();
+					ImageIO.write(bufferedImage, "png", byteArrayOut);
+					byte[] resultingBytes = byteArrayOut.toByteArray();
+					builder.addFile("qqimage.png", resultingBytes);
+				} catch (IOException ioException) {
+					builder.setContent("Failed to upload an image.");
+				}
+				client.send(builder.build());
+			}
 		}
 
-		if(!builder.isEmpty()) client.send(builder.build());
 		return ListeningStatus.LISTENING;
 	}
 }
