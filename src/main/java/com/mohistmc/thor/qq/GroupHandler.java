@@ -12,6 +12,12 @@ import java.util.List;
 
 import static com.mohistmc.thor.MohistMC.*;
 
+/**
+ * @author 	Shawiiz_z
+ * @date  	01/07/2021 13:05
+ * @version 0.1
+ */
+
 public class GroupHandler {
 	Group group;
 	String lastSpeaker = "436832490263412736";

@@ -12,6 +12,12 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
+/**
+ * @author 	Shawiiz_z
+ * @date  	01/07/2021 13:05
+ * @version 0.1
+ */
+
 public class Utils {
 
 	public static MessageChainBuilder makeMessage(GroupHandler handler, Friend f, Message m) throws Exception {

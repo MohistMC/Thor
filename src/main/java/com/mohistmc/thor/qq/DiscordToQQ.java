@@ -8,6 +8,12 @@ import net.mamoe.mirai.message.data.MessageChainBuilder;
 import static com.mohistmc.thor.qq.Utils.makeMessage;
 import static com.mohistmc.thor.qq.Utils.translate;
 
+/**
+ * @author 	Shawiiz_z
+ * @date  	01/07/2021 13:05
+ * @version 0.1
+ */
+
 public class DiscordToQQ extends ListenerAdapter {
 
 	public void onGuildMessageReceived(GuildMessageReceivedEvent e) {

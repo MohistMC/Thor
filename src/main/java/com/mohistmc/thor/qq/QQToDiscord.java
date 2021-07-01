@@ -19,6 +19,12 @@ import static com.mohistmc.thor.MohistMC.groups;
 import static com.mohistmc.thor.qq.Utils.getInput;
 import static com.mohistmc.thor.qq.Utils.translate;
 
+/**
+ * @author 	Shawiiz_z
+ * @date  	01/07/2021 13:05
+ * @version 0.1
+ */
+
 public class QQToDiscord extends SimpleListenerHost {
 
 	@EventHandler

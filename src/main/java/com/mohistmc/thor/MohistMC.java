@@ -12,6 +12,12 @@ import net.mamoe.mirai.event.Events;
 import javax.security.auth.login.LoginException;
 import java.util.HashMap;
 
+/**
+ * @author 	Shawiiz_z
+ * @date  	01/07/2021 13:05
+ * @version 0.1
+ */
+
 public class MohistMC {
 	public static JDA jda;
 	public static Bot bot;
