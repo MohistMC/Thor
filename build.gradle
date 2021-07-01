@@ -1,0 +1,37 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '5.2.0'
+}
+
+compileJava.options.encoding = 'UTF-8'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+version = "QQ-0.1"
+
+jar {
+    manifest {
+        attributes (
+            'Main-Class': 'com.mohistmc.thor.MohistMC'
+        )
+    }
+}
+
+project.configurations.implementation.canBeResolved(true)
+shadowJar {
+    configurations = [project.configurations.implementation]
+    classifier = ''
+}
+
+repositories {
+    mavenCentral()
+    jcenter()
+    maven { url = 'https://jitpack.io/'}
+}
+
+dependencies {
+    implementation 'net.dv8tion:JDA:4.2.0_168'
+    implementation "net.mamoe:mirai-core:1.3.1"
+    implementation "net.mamoe:mirai-core-qqandroid:1.3.1"
+    implementation "club.minnced:discord-webhooks:+"
+    implementation files('D:/CREATIONS DEV/WORKSPACEIDEA/ShaGoogleTranslate/out/artifacts/ShaGoogleTranslate_jar/ShaGoogleTranslate.jar')
+}
