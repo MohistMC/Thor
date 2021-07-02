@@ -30,7 +30,7 @@ public class Utils {
 				msg = msg.replace(".t ", "") + "\n-------\n" + translate(msg.replace(".t ", ""), "zh-CN");
 			else if(handler.autoTranslate.contains(m.getAuthor().getId())) {
 				String t = translate(msg, "zh-CN");
-				msg += t.length() == 0 || t.equals(msg) ? "" : "\n-------\n" + t;
+				msg += t.length() == 0 || t.equalsIgnoreCase(msg) ? "" : "\n-------\n" + t;
 			}
 
 			msg = m.getAuthor().getName() + ": " + msg;
