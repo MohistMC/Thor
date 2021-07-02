@@ -71,9 +71,9 @@ public class QQToDiscord extends SimpleListenerHost {
 		if(!e.getMessage().contentToString().equals("[图片]") && !e.getMessage().contentToString().equals("[表情]")) {
 			try {
 				String translation = translate(originalMsg, "en");
-				if(translation.length() == 0 || translation.equals(msg)) throw new Exception();
+				if(translation.length() == 0 || translation.equalsIgnoreCase(msg)) throw new Exception();
 
-				builder.setContent(msg + "\n--------\n" + translation);
+				builder.setContent(msg + "\n--\n" + translation+"\n** **");
 			} catch (Exception ex) { //Failed to translate or translation isn't needed, just send the original message
 				builder.setContent(msg);
 			}
