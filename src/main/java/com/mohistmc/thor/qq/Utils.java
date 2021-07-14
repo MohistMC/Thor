@@ -34,7 +34,7 @@ public class Utils {
 			}
 
 			msg = m.getAuthor().getName() + ": " + msg;
-		}
+		} else msg = msg.replaceFirst(".a ", "");
 
 		String[] words = msg.split(" ");
 		String translation = null;
