@@ -78,6 +78,7 @@ public class QQToDiscord extends SimpleListenerHost {
 				builder.setContent(msg);
 			}
 			if(!builder.isEmpty()) client.send(builder.build()); //Send message content
+                        builder = new WebhookMessageBuilder();
 		}
 
 		//Send emojis, voices and images
