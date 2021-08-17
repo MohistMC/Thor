@@ -1,44 +1,70 @@
 package com.mohistmc.thor.qq;
 
 import club.minnced.discord.webhook.WebhookClient;
-import club.minnced.discord.webhook.send.WebhookEmbedBuilder;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
-import net.dv8tion.jda.api.entities.Member;
 import net.mamoe.mirai.event.EventHandler;
-import net.mamoe.mirai.event.ListeningStatus;
 import net.mamoe.mirai.event.SimpleListenerHost;
-import net.mamoe.mirai.message.GroupMessageEvent;
-import net.mamoe.mirai.message.data.Face;
-import net.mamoe.mirai.message.data.Image;
-import net.mamoe.mirai.message.data.Voice;
-
-import java.io.IOException;
-import java.net.URLConnection;
-import java.util.ArrayList;
-
+import net.mamoe.mirai.event.events.GroupMessageEvent;
 import static com.mohistmc.thor.MohistMC.groups;
-import static com.mohistmc.thor.qq.Utils.*;
+
+import com.mohistmc.thor.qq.adapter.QQAdapter;
+import com.mohistmc.thor.qq.adapter.message.DiscordMessage;
+import com.mohistmc.thor.qq.adapter.message.DiscordMessageChain;
+import com.mohistmc.thor.qq.adapter.message.Link;
+import com.mohistmc.thor.qq.adapter.message.Ping;
+import com.mohistmc.thor.qq.adapter.message.Text;
 
 /**
- * @author Shawiiz_z
- * @version 0.1
- * @date 01/07/2021 13:05
+ * @author Shawiiz_z khjxiaogu
+ * @version 0.2
+ * @date 18/08/2021 1:34
  */
 
 public class QQToDiscord extends SimpleListenerHost {
 
 	@EventHandler
-	public ListeningStatus onMessage(GroupMessageEvent e) {
-		if(!groups.containsKey(e.getGroup().getId())) return ListeningStatus.LISTENING;
-
+	public void onMessage(GroupMessageEvent e) {
+		if(!groups.containsKey(e.getGroup().getId())) return;
+		
 		GroupHandler group = groups.get(e.getGroup().getId());
 		String username = e.getSenderName().length() == 0 ? e.getSender().getNick() : e.getSenderName();
 		WebhookClient client = group.wbclient;
-		WebhookMessageBuilder builder = new WebhookMessageBuilder();
-		builder.setUsername(username);
-		builder.setAvatarUrl(e.getSender().getAvatarUrl());
-
-		String msg = e.getMessage().contentToString().replaceAll("\\[图片\\]", "").replaceAll("\\[表情\\]", "").replace("@DiscordBot", "<@" + group.lastSpeaker + ">");
+		DiscordMessageChain dmc=QQAdapter.convert(e.getMessage(),group);
+		StringBuilder msg=new StringBuilder();//text message buffer
+		StringBuilder translated=new StringBuilder();//translated message buffer
+		for(DiscordMessage dm:dmc) {//send every single message to get best appearance XXXD
+			if(dm.getClass()==Text.class) {//translate if and only if message is Text
+				msg.append(((Text) dm).getContent());
+				try {
+					translated.append(Utils.translate(((Text) dm).getContent(),"en"));
+				} catch (Exception e1) {//no translate would be added
+				}
+			}else if(dm.getClass()==Ping.class) {//well, do not translate ping
+				msg.append(((Text) dm).getContent());
+				translated.append(((Ping) dm).getHelpText());
+			}else if(dm.getClass()==Link.class){//Web Image, Send separately
+				WebhookMessageBuilder builder = dm.getDiscord();
+				builder.setUsername(username);
+				builder.setAvatarUrl(e.getSender().getAvatarUrl());
+				client.send(builder.build());
+			}else{//other complex message
+				WebhookMessageBuilder builder = dm.getDiscord();
+				if(msg.length()>0) {//send text buffer first
+					if(translated.length()>0) {// if translation present.
+						builder.setContent(msg.toString() + "\n<--->\n" + translated.toString() + (group.lastQQSpeaker.equals(username) ? "\n** **" : ""));
+						translated=new StringBuilder();//clear buffer
+					}else {
+						builder.setContent(msg.toString());
+					}
+					msg=new StringBuilder();//clear buffer, anyway.
+				}
+				
+				builder.setUsername(username);
+				builder.setAvatarUrl(e.getSender().getAvatarUrl());
+				client.send(builder.build());
+			}
+		}
+		/*String msg = e.getMessage().contentToString().replaceAll("\\[图片\\]", "").replaceAll("\\[表情\\]", "").replace("@DiscordBot", "<@" + group.lastSpeaker + ">");
 		String originalMsg = msg; //Fix weird user id translation and put name instead.
 
 		//Ping corresponding Discord users
@@ -62,7 +88,7 @@ public class QQToDiscord extends SimpleListenerHost {
 					"\n" + msg.split("<summary>")[1].split("</summary>")[0]);
 			builder.addEmbeds(webhookEmbedBuilder.build());
 			client.send(builder.build());
-			return ListeningStatus.LISTENING;
+			return;
 		}
 
 		if(!e.getMessage().contentToString().equals("[图片]") && !e.getMessage().contentToString().equals("[表情]")) {
@@ -97,7 +123,6 @@ public class QQToDiscord extends SimpleListenerHost {
 			if(m instanceof Image) {
 				try {
 					URLConnection conn = getConn(e.getBot().queryImageUrl((Image) m).replace("?term=2", ""));
-
 					if(conn.getHeaderField("Content-Type").contains("gif"))
 						builder.addFile("qqimage.gif", conn.getInputStream());
 					else
@@ -108,9 +133,9 @@ public class QQToDiscord extends SimpleListenerHost {
 				client.send(builder.build());
 			}
 		}
-
+		 */
 		group.lastQQSpeaker = username;
 
-		return ListeningStatus.LISTENING;
+		return;
 	}
 }

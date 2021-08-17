@@ -6,10 +6,12 @@ import com.mohistmc.thor.qq.QQToDiscord;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.mamoe.mirai.Bot;
-import net.mamoe.mirai.BotFactoryJvm;
-import net.mamoe.mirai.event.Events;
+import net.mamoe.mirai.BotFactory;
+import net.mamoe.mirai.event.GlobalEventChannel;
 
+import java.io.File;
 import java.util.HashMap;
+import java.util.Scanner;
 
 /**
  * @author 	Shawiiz_z
@@ -23,14 +25,16 @@ public class MohistMC {
 	public static HashMap<Long, GroupHandler> groups = new HashMap<>();
 
 	public static void main(String[] args) throws Exception {
-		jda = new JDABuilder().setToken("token").addEventListeners(new DiscordToQQ()).build();
-
-		bot = BotFactoryJvm.newBot(0L /*Your account ID long*/, "password");
+		Scanner r=new Scanner(new File("DiscordToken.txt"));
+		jda = new JDABuilder().setToken(r.nextLine()).addEventListeners(new DiscordToQQ()).build();
+		Scanner r2=new Scanner(new File("QQToken.txt"));
+		
+		bot = BotFactory.INSTANCE.newBot(Long.parseLong(r2.nextLine()),r2.nextLine());
 		bot.login();
-		Events.registerEvents(bot, new QQToDiscord());
+		GlobalEventChannel.INSTANCE.registerListenerHost(new QQToDiscord());
 		jda.awaitReady(); //Wait for JDA to be ready before registering groups
-
-		//Register Discord channel and assign it to a group
-		new GroupHandler("QQgroupId", "DiscordChannelId", "WebhookURL");
+		Scanner r3=new Scanner(new File("Handler.txt"));
+		//Register Discord channel and assign it to a group 
+		new GroupHandler(r3.nextLine(),r3.nextLine(),r3.nextLine());
 	}
 }
