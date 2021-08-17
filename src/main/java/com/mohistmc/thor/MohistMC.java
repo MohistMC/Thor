@@ -9,7 +9,11 @@ import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.BotFactoryJvm;
 import net.mamoe.mirai.event.Events;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.Reader;
 import java.util.HashMap;
+import java.util.Scanner;
 
 /**
  * @author 	Shawiiz_z
@@ -23,14 +27,15 @@ public class MohistMC {
 	public static HashMap<Long, GroupHandler> groups = new HashMap<>();
 
 	public static void main(String[] args) throws Exception {
-		jda = new JDABuilder().setToken("token").addEventListeners(new DiscordToQQ()).build();
-
-		bot = BotFactoryJvm.newBot(0L /*Your account ID long*/, "password");
+		Scanner r=new Scanner(new File("DiscordToken.txt"));
+		jda = new JDABuilder().setToken(r.nextLine()).addEventListeners(new DiscordToQQ()).build();
+		Scanner r2=new Scanner(new File("QQToken.txt"));
+		bot = BotFactoryJvm.newBot(Long.parseLong(r2.nextLine()),r2.nextLine());
 		bot.login();
 		Events.registerEvents(bot, new QQToDiscord());
 		jda.awaitReady(); //Wait for JDA to be ready before registering groups
-
+		Scanner r3=new Scanner(new File("Handler.txt"));
 		//Register Discord channel and assign it to a group
-		new GroupHandler("QQgroupId", "DiscordChannelId", "WebhookURL");
+		new GroupHandler(r3.nextLine(),r3.nextLine(),r3.nextLine());
 	}
 }
