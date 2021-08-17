@@ -9,7 +9,6 @@ import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.BotFactoryJvm;
 import net.mamoe.mirai.event.Events;
 
-import javax.security.auth.login.LoginException;
 import java.util.HashMap;
 
 /**
@@ -23,12 +22,14 @@ public class MohistMC {
 	public static Bot bot;
 	public static HashMap<Long, GroupHandler> groups = new HashMap<>();
 
-	public static void main(String[] args) throws LoginException {
+	public static void main(String[] args) throws Exception {
 		jda = new JDABuilder().setToken("token").addEventListeners(new DiscordToQQ()).build();
 
 		bot = BotFactoryJvm.newBot(0L /*Your account ID long*/, "password");
 		bot.login();
 		Events.registerEvents(bot, new QQToDiscord());
+		jda.awaitReady(); //Wait for JDA to be ready before registering groups
+
 		//Register Discord channel and assign it to a group
 		new GroupHandler("QQgroupId", "DiscordChannelId", "WebhookURL");
 	}

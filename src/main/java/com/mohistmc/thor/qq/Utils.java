@@ -13,9 +13,9 @@ import java.net.URL;
 import java.net.URLConnection;
 
 /**
- * @author 	Shawiiz_z
- * @date  	01/07/2021 13:05
+ * @author Shawiiz_z
  * @version 0.1
+ * @date 01/07/2021 13:05
  */
 
 public class Utils {
@@ -27,10 +27,10 @@ public class Utils {
 		//TRANSLATE MESSAGE IF NEEDED
 		if(!msg.startsWith(".a")) {
 			if(msg.startsWith(".t"))
-				msg = msg.replace(".t ", "") + "\n-------\n" + translate(msg.replace(".t ", ""), "zh-CN");
+				msg = msg.replace(".t ", "") + "\n<--->\n" + translate(msg.replace(".t ", ""), "zh-CN");
 			else if(handler.autoTranslate.contains(m.getAuthor().getId())) {
 				String t = translate(msg, "zh-CN");
-				msg += t.length() == 0 || t.equalsIgnoreCase(msg) ? "" : "\n-------\n" + t;
+				msg += t.length() == 0 || t.equalsIgnoreCase(msg) ? "" : "\n<--->\n" + t;
 			}
 
 			msg = m.getAuthor().getName() + ": " + msg;
@@ -38,14 +38,14 @@ public class Utils {
 
 		String[] words = msg.split(" ");
 		String translation = null;
-		if(msg.contains("\n-------\n")) {
-			String[] tSplit = msg.split("\n-------\n");
+		if(msg.contains("\n<--->\n")) {
+			String[] tSplit = msg.split("\n<--->\n");
 			words = tSplit[0].split(" ");
 			translation = tSplit[1];
 		}
 
 		for (String word : words) {
-			if(word.startsWith("@")) { //Handle mentions
+			if(word.startsWith("@")) {
 				String potentialMember = word.split("@")[1];
 				if(handler.members.containsKey(potentialMember)) {
 					qqmsg.append(new At(handler.members.get(potentialMember))).append(" ");
@@ -56,14 +56,14 @@ public class Utils {
 			qqmsg.append(word).append(" ");
 		}
 		if(translation != null)
-			qqmsg.append("\n-------\n").append(translation);
+			qqmsg.append("\n<--->\n").append(translation);
 
 		for (Message.Attachment a : m.getAttachments())
-			if(f != null) qqmsg.append(f.uploadImage(new URL(a.getUrl()))); //Upload friend
-			else qqmsg.append(handler.group.uploadImage(new URL(a.getUrl()))); //Upload group
+			if(f != null) qqmsg.append(f.uploadImage(getInput(a.getUrl()))); //Upload friend
+			else qqmsg.append(handler.group.uploadImage(getInput(a.getUrl()))); //Upload group
 		for (Emote o : m.getEmotes())
-			if(f != null) qqmsg.append(f.uploadImage(new URL(o.getImageUrl()))); //Upload friend
-			else qqmsg.append(handler.group.uploadImage(new URL(o.getImageUrl()))); //Upload group
+			if(f != null) qqmsg.append(f.uploadImage(getInput(o.getImageUrl()))); //Upload friend
+			else qqmsg.append(handler.group.uploadImage(getInput(o.getImageUrl()))); //Upload group
 		handler.lastSpeaker = m.getAuthor().getId();
 		return qqmsg;
 	}

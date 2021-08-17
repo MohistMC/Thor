@@ -13,14 +13,15 @@ import java.util.List;
 import static com.mohistmc.thor.MohistMC.*;
 
 /**
- * @author 	Shawiiz_z
- * @date  	01/07/2021 13:05
+ * @author Shawiiz_z
  * @version 0.1
+ * @date 01/07/2021 13:05
  */
 
 public class GroupHandler {
 	Group group;
 	String lastSpeaker = "436832490263412736";
+	String lastQQSpeaker;
 	WebhookClient wbclient;
 	TextChannel tc;
 	HashMap<String, Member> members = new HashMap<>();

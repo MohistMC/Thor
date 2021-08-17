@@ -5,13 +5,15 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.mamoe.mirai.message.data.MessageChainBuilder;
 
+import java.util.concurrent.CompletableFuture;
+
 import static com.mohistmc.thor.qq.Utils.makeMessage;
 import static com.mohistmc.thor.qq.Utils.translate;
 
 /**
- * @author 	Shawiiz_z
- * @date  	01/07/2021 13:05
+ * @author Shawiiz_z
  * @version 0.1
+ * @date 01/07/2021 13:05
  */
 
 public class DiscordToQQ extends ListenerAdapter {
@@ -75,14 +77,17 @@ public class DiscordToQQ extends ListenerAdapter {
 		} catch (Exception ignored) {
 		}
 
-		try {
-			MessageChainBuilder built = makeMessage(group, null, e.getMessage());
-			group.group.sendMessage(built.build());
-			if(!group.displayConfirm.contains(e.getAuthor().getId()))
-				e.getChannel().sendMessage(built.build().contentToString()).queue();
-		} catch (Exception exception) {
-			e.getChannel().sendMessage("Failed to send this message!").queue();
-			exception.printStackTrace();
-		}
+		//Send messages asynchronously to not block other messages
+		CompletableFuture.runAsync(() -> {
+			try {
+				MessageChainBuilder built = makeMessage(group, null, e.getMessage());
+				group.group.sendMessage(built.build());
+				if(!group.displayConfirm.contains(e.getAuthor().getId()))
+					e.getChannel().sendMessage(built.build().contentToString()).queue();
+			} catch (Exception exception) {
+				e.getChannel().sendMessage("Failed to send this message!").queue();
+				exception.printStackTrace();
+			}
+		});
 	}
 }

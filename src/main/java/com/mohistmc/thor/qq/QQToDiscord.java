@@ -12,21 +12,17 @@ import net.mamoe.mirai.message.data.Face;
 import net.mamoe.mirai.message.data.Image;
 import net.mamoe.mirai.message.data.Voice;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 
 import static com.mohistmc.thor.MohistMC.groups;
-import static com.mohistmc.thor.qq.Utils.getInput;
-import static com.mohistmc.thor.qq.Utils.translate;
+import static com.mohistmc.thor.qq.Utils.*;
 
 /**
- * @author 	Shawiiz_z
- * @date  	01/07/2021 13:05
+ * @author Shawiiz_z
  * @version 0.1
+ * @date 01/07/2021 13:05
  */
 
 public class QQToDiscord extends SimpleListenerHost {
@@ -36,9 +32,10 @@ public class QQToDiscord extends SimpleListenerHost {
 		if(!groups.containsKey(e.getGroup().getId())) return ListeningStatus.LISTENING;
 
 		GroupHandler group = groups.get(e.getGroup().getId());
+		String username = e.getSenderName().length() == 0 ? e.getSender().getNick() : e.getSenderName();
 		WebhookClient client = group.wbclient;
 		WebhookMessageBuilder builder = new WebhookMessageBuilder();
-		builder.setUsername(e.getSenderName().length() == 0 ? e.getSender().getNick() : e.getSenderName());
+		builder.setUsername(username);
 		builder.setAvatarUrl(e.getSender().getAvatarUrl());
 
 		String msg = e.getMessage().contentToString().replaceAll("\\[图片\\]", "").replaceAll("\\[表情\\]", "").replace("@DiscordBot", "<@" + group.lastSpeaker + ">");
@@ -73,12 +70,12 @@ public class QQToDiscord extends SimpleListenerHost {
 				String translation = translate(originalMsg, "en");
 				if(translation.length() == 0 || translation.equalsIgnoreCase(msg)) throw new Exception();
 
-				builder.setContent(msg + "\n--\n" + translation+"\n** **");
+				builder.setContent(msg + "\n<--->\n" + translation + (group.lastQQSpeaker.equals(username) ? "\n** **" : ""));
 			} catch (Exception ex) { //Failed to translate or translation isn't needed, just send the original message
 				builder.setContent(msg);
 			}
 			if(!builder.isEmpty()) client.send(builder.build()); //Send message content
-                        builder = new WebhookMessageBuilder();
+			builder.setContent("");
 		}
 
 		//Send emojis, voices and images
@@ -86,27 +83,33 @@ public class QQToDiscord extends SimpleListenerHost {
 			if(m instanceof Face) {
 				builder.setContent("https://raw.githubusercontent.com/khjxiaogu/DefaultQQEmoticon/master/emoji/" + ((Face) m).getId() + ".gif");
 				client.send(builder.build());
+				builder.setContent("");
 			}
 			if(m instanceof Voice) {
 				try {
 					builder.addFile(((Voice) m).getFileName(), getInput(((Voice) m).getUrl()));
 					client.send(builder.build());
+					builder.setContent("");
+					builder.resetFiles();
 				} catch (IOException ignored) {
 				}
 			}
 			if(m instanceof Image) {
 				try {
-					BufferedImage bufferedImage = ImageIO.read(new URL(e.getBot().queryImageUrl((Image) m).replace("?term=2", "")));
-					ByteArrayOutputStream byteArrayOut = new ByteArrayOutputStream();
-					ImageIO.write(bufferedImage, "png", byteArrayOut);
-					byte[] resultingBytes = byteArrayOut.toByteArray();
-					builder.addFile("qqimage.png", resultingBytes);
+					URLConnection conn = getConn(e.getBot().queryImageUrl((Image) m).replace("?term=2", ""));
+
+					if(conn.getHeaderField("Content-Type").contains("gif"))
+						builder.addFile("qqimage.gif", conn.getInputStream());
+					else
+						builder.addFile("qqimage.png", conn.getInputStream());
 				} catch (IOException ioException) {
 					builder.setContent("Failed to upload an image.");
 				}
 				client.send(builder.build());
 			}
 		}
+
+		group.lastQQSpeaker = username;
 
 		return ListeningStatus.LISTENING;
 	}
