@@ -23,6 +23,7 @@ shadowJar {
 }
 
 repositories {
+	mavenLocal()
     mavenCentral()
     jcenter()
     maven { url = 'https://jitpack.io/'}
@@ -30,7 +31,7 @@ repositories {
 
 dependencies {
     implementation 'net.dv8tion:JDA:4.2.0_168'
-    implementation "net.mamoe:mirai-core:2.7-M1"
+    implementation "net.mamoe:mirai-core:2.7-M2"
     implementation "club.minnced:discord-webhooks:+"
     implementation files('D:/CREATIONS DEV/WORKSPACEIDEA/ShaGoogleTranslate/out/artifacts/ShaGoogleTranslate_jar/ShaGoogleTranslate.jar')
 }
