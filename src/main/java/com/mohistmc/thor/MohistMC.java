@@ -6,12 +6,10 @@ import com.mohistmc.thor.qq.QQToDiscord;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.mamoe.mirai.Bot;
-import net.mamoe.mirai.BotFactoryJvm;
-import net.mamoe.mirai.event.Events;
+import net.mamoe.mirai.BotFactory;
+import net.mamoe.mirai.event.GlobalEventChannel;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.Reader;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -30,12 +28,13 @@ public class MohistMC {
 		Scanner r=new Scanner(new File("DiscordToken.txt"));
 		jda = new JDABuilder().setToken(r.nextLine()).addEventListeners(new DiscordToQQ()).build();
 		Scanner r2=new Scanner(new File("QQToken.txt"));
-		bot = BotFactoryJvm.newBot(Long.parseLong(r2.nextLine()),r2.nextLine());
+		
+		bot = BotFactory.INSTANCE.newBot(Long.parseLong(r2.nextLine()),r2.nextLine());
 		bot.login();
-		Events.registerEvents(bot, new QQToDiscord());
+		GlobalEventChannel.INSTANCE.registerListenerHost(new QQToDiscord());
 		jda.awaitReady(); //Wait for JDA to be ready before registering groups
 		Scanner r3=new Scanner(new File("Handler.txt"));
-		//Register Discord channel and assign it to a group
+		//Register Discord channel and assign it to a group 
 		new GroupHandler(r3.nextLine(),r3.nextLine(),r3.nextLine());
 	}
 }
