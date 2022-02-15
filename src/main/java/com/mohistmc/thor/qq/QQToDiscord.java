@@ -3,11 +3,13 @@ package com.mohistmc.thor.qq;
 import club.minnced.discord.webhook.WebhookClient;
 import club.minnced.discord.webhook.send.WebhookEmbedBuilder;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
+import com.mohistmc.thor.MohistMC;
 import net.dv8tion.jda.api.entities.Member;
+import net.mamoe.mirai.Mirai;
 import net.mamoe.mirai.event.EventHandler;
 import net.mamoe.mirai.event.ListeningStatus;
 import net.mamoe.mirai.event.SimpleListenerHost;
-import net.mamoe.mirai.message.GroupMessageEvent;
+import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.message.data.Face;
 import net.mamoe.mirai.message.data.Image;
 import net.mamoe.mirai.message.data.Voice;
@@ -62,6 +64,7 @@ public class QQToDiscord extends SimpleListenerHost {
 					"\n" + msg.split("<summary>")[1].split("</summary>")[0]);
 			builder.addEmbeds(webhookEmbedBuilder.build());
 			client.send(builder.build());
+			builder.resetEmbeds();
 			return ListeningStatus.LISTENING;
 		}
 
@@ -74,7 +77,8 @@ public class QQToDiscord extends SimpleListenerHost {
 			} catch (Exception ex) { //Failed to translate or translation isn't needed, just send the original message
 				builder.setContent(msg);
 			}
-			if(!builder.isEmpty()) client.send(builder.build()); //Send message content
+			if(!builder.isEmpty())
+				client.send(builder.build()); //Send message content
 			builder.setContent("");
 		}
 
@@ -96,7 +100,7 @@ public class QQToDiscord extends SimpleListenerHost {
 			}
 			if(m instanceof Image) {
 				try {
-					URLConnection conn = getConn(e.getBot().queryImageUrl((Image) m).replace("?term=2", ""));
+					URLConnection conn = getConn(Mirai.getInstance().queryImageUrl(MohistMC.bot, (Image) m).replace("?term=2", ""));
 
 					if(conn.getHeaderField("Content-Type").contains("gif"))
 						builder.addFile("qqimage.gif", conn.getInputStream());

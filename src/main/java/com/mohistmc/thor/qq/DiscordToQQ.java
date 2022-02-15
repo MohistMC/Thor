@@ -1,7 +1,7 @@
 package com.mohistmc.thor.qq;
 
 import com.mohistmc.thor.MohistMC;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.mamoe.mirai.message.data.MessageChainBuilder;
 
@@ -18,16 +18,17 @@ import static com.mohistmc.thor.qq.Utils.translate;
 
 public class DiscordToQQ extends ListenerAdapter {
 
-	public void onGuildMessageReceived(GuildMessageReceivedEvent e) {
+	public void onMessageReceived(MessageReceivedEvent e) {
 		if(e.isWebhookMessage()
+				|| !e.getChannelType().isGuild()
 				|| e.getAuthor().isBot()
 				|| e.getMessage().getContentRaw().startsWith(".no")) return;
 
 		//Basic checks
-		if(e.getChannel().getTopic() == null) return;
+		if(e.getTextChannel().getTopic() == null) return;
 		long qqGroup;
 		try {
-			qqGroup = Long.parseLong(e.getChannel().getTopic());
+			qqGroup = Long.parseLong(e.getTextChannel().getTopic());
 		} catch (Exception ex) {
 			return;
 		}

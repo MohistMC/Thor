@@ -5,9 +5,12 @@ import com.mohistmc.thor.qq.GroupHandler;
 import com.mohistmc.thor.qq.QQToDiscord;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.ChunkingFilter;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.mamoe.mirai.Bot;
-import net.mamoe.mirai.BotFactoryJvm;
-import net.mamoe.mirai.event.Events;
+import net.mamoe.mirai.BotFactory;
+import net.mamoe.mirai.event.GlobalEventChannel;
 
 import java.util.HashMap;
 
@@ -23,14 +26,21 @@ public class MohistMC {
 	public static HashMap<Long, GroupHandler> groups = new HashMap<>();
 
 	public static void main(String[] args) throws Exception {
-		jda = new JDABuilder().setToken("token").addEventListeners(new DiscordToQQ()).build();
+		jda = JDABuilder.createDefault("token",
+						GatewayIntent.GUILD_MESSAGES,
+						GatewayIntent.GUILD_MEMBERS,
+						GatewayIntent.GUILD_EMOJIS)
+				.setMemberCachePolicy(MemberCachePolicy.ALL)
+				.setChunkingFilter(ChunkingFilter.ALL)
+				.addEventListeners(
+						new DiscordToQQ())
+				.build().awaitReady();
 
-		bot = BotFactoryJvm.newBot(0L /*Your account ID long*/, "password");
+		bot = BotFactory.INSTANCE.newBot(0L /*Your account ID long*/, "password");
 		bot.login();
-		Events.registerEvents(bot, new QQToDiscord());
-		jda.awaitReady(); //Wait for JDA to be ready before registering groups
+		GlobalEventChannel.INSTANCE.registerListenerHost(new QQToDiscord());
 
 		//Register Discord channel and assign it to a group
-		new GroupHandler("QQgroupId", "DiscordChannelId", "WebhookURL");
+		new GroupHandler("groupId", "discordChannelId", "webhookUrl");
 	}
 }

@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.mamoe.mirai.contact.Friend;
 import net.mamoe.mirai.message.data.At;
 import net.mamoe.mirai.message.data.MessageChainBuilder;
+import net.mamoe.mirai.utils.ExternalResource;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,7 +49,7 @@ public class Utils {
 			if(word.startsWith("@")) {
 				String potentialMember = word.split("@")[1];
 				if(handler.members.containsKey(potentialMember)) {
-					qqmsg.append(new At(handler.members.get(potentialMember))).append(" ");
+					qqmsg.append(new At(handler.members.get(potentialMember).getId())).append(" ");
 					System.out.println("found");
 					continue;
 				}
@@ -59,11 +60,11 @@ public class Utils {
 			qqmsg.append("\n<--->\n").append(translation);
 
 		for (Message.Attachment a : m.getAttachments())
-			if(f != null) qqmsg.append(f.uploadImage(getInput(a.getUrl()))); //Upload friend
-			else qqmsg.append(handler.group.uploadImage(getInput(a.getUrl()))); //Upload group
+			if(f != null) qqmsg.append(f.uploadImage(ExternalResource.create(getInput(a.getUrl())))); //Upload friend
+			else qqmsg.append(handler.group.uploadImage(ExternalResource.create(getInput(a.getUrl())))); //Upload group
 		for (Emote o : m.getEmotes())
-			if(f != null) qqmsg.append(f.uploadImage(getInput(o.getImageUrl()))); //Upload friend
-			else qqmsg.append(handler.group.uploadImage(getInput(o.getImageUrl()))); //Upload group
+			if(f != null) qqmsg.append(f.uploadImage(ExternalResource.create(getInput(o.getImageUrl())))); //Upload friend
+			else qqmsg.append(handler.group.uploadImage(ExternalResource.create(getInput(o.getImageUrl())))); //Upload group
 		handler.lastSpeaker = m.getAuthor().getId();
 		return qqmsg;
 	}
